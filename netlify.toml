@@ -5,11 +5,6 @@
 [build.environment]
   NODE_VERSION = "18"
 
-# Redirect all routes to index.html for client-side routing
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
 
 # MIME type headers for JavaScript modules
 [[headers]]
