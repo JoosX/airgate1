@@ -12,6 +12,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Plane, User, Phone, Mail, Luggage, Shield, AlertCircle } from "lucide-react";
 
+import SeatMap from "@/components/SeatMap";
+
 const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -27,6 +29,22 @@ const Checkout = () => {
   const [luggageSize, setLuggageSize] = useState("small");
   const [flightPlan, setFlightPlan] = useState("economy");
   const [selectedSeat, setSelectedSeat] = useState("");
+
+  // Generate random occupied seats only once on mount
+  const [occupiedSeats] = useState(() => {
+    const seats = [];
+    const rows = 20;
+    const letters = ["A", "B", "C", "D", "E", "F"];
+    // Occupy roughly 30% of seats randomly
+    for (let i = 1; i <= rows; i++) {
+      for (const letter of letters) {
+        if (Math.random() < 0.3) {
+          seats.push(`${i}${letter}`);
+        }
+      }
+    }
+    return seats;
+  });
 
   if (!user) {
     navigate("/login");
@@ -81,7 +99,7 @@ const Checkout = () => {
     const seatsPerRow = 6;
     const seats = [];
     const letters = ["A", "B", "C", "D", "E", "F"];
-    
+
     for (let i = 1; i <= rows; i++) {
       for (let j = 0; j < seatsPerRow; j++) {
         seats.push(`${i}${letters[j]}`);
@@ -93,7 +111,7 @@ const Checkout = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <div className="container mx-auto px-4 pt-24 pb-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -101,7 +119,7 @@ const Checkout = () => {
           transition={{ duration: 0.5 }}
         >
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-8">Finalizar Compra</h1>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Form */}
             <div className="lg:col-span-2 space-y-6">
@@ -262,19 +280,25 @@ const Checkout = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="seat">Selección de Asiento</Label>
-                    <Select value={selectedSeat} onValueChange={setSelectedSeat}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un asiento" />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-60">
-                        {generateSeats().map((seat) => (
-                          <SelectItem key={seat} value={seat}>
-                            Asiento {seat}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Label className="mb-4 block">Selección de Asiento</Label>
+                    <div className="bg-slate-50 p-4 rounded-lg border border-border/50">
+                      <SeatMap
+                        selectedSeat={selectedSeat}
+                        onSelectSeat={setSelectedSeat}
+                        occupiedSeats={occupiedSeats}
+                      />
+                      <div className="mt-4 text-center">
+                        {selectedSeat ? (
+                          <p className="text-lg font-medium text-primary">
+                            Asiento seleccionado: <span className="font-bold">{selectedSeat}</span>
+                          </p>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">
+                            Por favor selecciona un asiento en el mapa
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
