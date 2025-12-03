@@ -179,11 +179,11 @@ const Payment = () => {
                                             <span className="text-muted-foreground">Vuelo base</span>
                                             <span className="font-semibold">${booking.flight.price}</span>
                                         </p>
-                                        {booking.extras.luggageSize !== "small" && (
+                                        {booking.extras.baggageSelections && booking.extras.baggageSelections.reduce((sum: number, item: any) => sum + item.price, 0) > 0 && (
                                             <p className="flex justify-between">
-                                                <span className="text-muted-foreground">Equipaje</span>
+                                                <span className="text-muted-foreground">Equipaje extra</span>
                                                 <span className="font-semibold">
-                                                    +${booking.extras.luggageSize === "medium" ? 30 : 60}
+                                                    +${booking.extras.baggageSelections.reduce((sum: number, item: any) => sum + item.price, 0)}
                                                 </span>
                                             </p>
                                         )}

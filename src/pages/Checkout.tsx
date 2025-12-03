@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { Plane, User, Phone, Mail, Luggage, Shield, AlertCircle } from "lucide-react";
 
 import SeatMap from "@/components/SeatMap";
+import BaggageSelector, { BaggageSelection } from "@/components/BaggageSelector";
 
 const Checkout = () => {
   const location = useLocation();
@@ -26,7 +27,12 @@ const Checkout = () => {
   const [email, setEmail] = useState("");
   const [emergencyName, setEmergencyName] = useState("");
   const [emergencyPhone, setEmergencyPhone] = useState("");
-  const [luggageSize, setLuggageSize] = useState("small");
+
+  // New Baggage State
+  const [baggageSelections, setBaggageSelections] = useState<BaggageSelection[]>([
+    { type: "carry-on", quantity: 1, price: 0 } // Default included item
+  ]);
+
   const [flightPlan, setFlightPlan] = useState("economy");
   const [selectedSeat, setSelectedSeat] = useState("");
 
@@ -51,19 +57,14 @@ const Checkout = () => {
     return null;
   }
 
-  const luggagePrices: { [key: string]: number } = {
-    small: 0,
-    medium: 30,
-    large: 60
-  };
-
   const planPrices: { [key: string]: number } = {
     economy: 0,
     flexible: 50,
     premium: 120
   };
 
-  const totalPrice = flight.price + luggagePrices[luggageSize] + planPrices[flightPlan];
+  const baggageTotal = baggageSelections.reduce((sum, item) => sum + item.price, 0);
+  const totalPrice = flight.price + baggageTotal + planPrices[flightPlan];
 
   const handleContinueToPayment = () => {
     if (!fullName || !idNumber || !phone || !email || !emergencyName || !emergencyPhone || !selectedSeat) {
@@ -76,7 +77,11 @@ const Checkout = () => {
       flight,
       passenger: { fullName, idNumber, phone, email },
       emergency: { name: emergencyName, phone: emergencyPhone },
-      extras: { luggageSize, flightPlan, selectedSeat },
+      extras: {
+        baggageSelections, // Updated to pass full selections
+        flightPlan,
+        selectedSeat
+      },
       totalPrice,
       date: new Date().toISOString(),
       isGuest
@@ -84,20 +89,6 @@ const Checkout = () => {
 
     // Navigate to payment page with booking data
     navigate("/payment", { state: { booking: bookingData } });
-  };
-
-  const generateSeats = () => {
-    const rows = 20;
-    const seatsPerRow = 6;
-    const seats = [];
-    const letters = ["A", "B", "C", "D", "E", "F"];
-
-    for (let i = 1; i <= rows; i++) {
-      for (let j = 0; j < seatsPerRow; j++) {
-        seats.push(`${i}${letters[j]}`);
-      }
-    }
-    return seats;
   };
 
   return (
@@ -251,28 +242,22 @@ const Checkout = () => {
                     Opciones de Vuelo
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="luggage">Tamaño de Equipaje</Label>
-                    <Select value={luggageSize} onValueChange={setLuggageSize}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="small">Pequeño (incluido)</SelectItem>
-                        <SelectItem value="medium">Mediano (+$30)</SelectItem>
-                        <SelectItem value="large">Grande (+$60)</SelectItem>
-                      </SelectContent>
-                    </Select>
+                <CardContent className="space-y-8">
+                  {/* New Baggage Selector */}
+                  <div className="space-y-4">
+                    <BaggageSelector
+                      selections={baggageSelections}
+                      onSelectionsChange={setBaggageSelections}
+                    />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="plan" className="flex items-center gap-2">
-                      <Shield className="h-4 w-4 text-primary" />
+                  <div className="space-y-2 pt-4 border-t border-border">
+                    <Label htmlFor="plan" className="flex items-center gap-2 text-lg font-semibold">
+                      <Shield className="h-5 w-5 text-primary" />
                       Plan de Vuelo
                     </Label>
                     <Select value={flightPlan} onValueChange={setFlightPlan}>
-                      <SelectTrigger>
+                      <SelectTrigger className="h-12">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -283,8 +268,8 @@ const Checkout = () => {
                     </Select>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label className="mb-4 block">Selección de Asiento</Label>
+                  <div className="space-y-2 pt-4 border-t border-border">
+                    <Label className="mb-4 block text-lg font-semibold">Selección de Asiento</Label>
                     <div className="bg-slate-50 p-4 rounded-lg border border-border/50">
                       <SeatMap
                         selectedSeat={selectedSeat}
@@ -320,12 +305,15 @@ const Checkout = () => {
                       <span className="text-muted-foreground">Vuelo base</span>
                       <span className="font-semibold">${flight.price}</span>
                     </div>
-                    {luggagePrices[luggageSize] > 0 && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Equipaje</span>
-                        <span className="font-semibold">+${luggagePrices[luggageSize]}</span>
+
+                    {/* Baggage Summary */}
+                    {baggageTotal > 0 && (
+                      <div className="flex justify-between text-blue-600">
+                        <span className="font-medium">Equipaje extra</span>
+                        <span className="font-bold">+${baggageTotal}</span>
                       </div>
                     )}
+
                     {planPrices[flightPlan] > 0 && (
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Plan de vuelo</span>
