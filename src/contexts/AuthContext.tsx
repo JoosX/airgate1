@@ -4,13 +4,17 @@ interface User {
   id: string;
   name: string;
   email: string;
+  isGuest?: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
+  isGuest: boolean;
   login: (email: string, password: string) => boolean;
   register: (name: string, email: string, password: string) => boolean;
   logout: () => void;
+  setGuestMode: () => void;
+  clearGuestMode: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,6 +23,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(() => {
     const savedUser = localStorage.getItem("user");
     return savedUser ? JSON.parse(savedUser) : null;
+  });
+
+  const [isGuest, setIsGuest] = useState<boolean>(() => {
+    return localStorage.getItem("isGuest") === "true";
   });
 
   const login = (email: string, password: string) => {
@@ -31,7 +39,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (foundUser) {
       const loggedUser = { id: foundUser.id, name: foundUser.name, email: foundUser.email };
       setUser(loggedUser);
+      setIsGuest(false);
       localStorage.setItem("user", JSON.stringify(loggedUser));
+      localStorage.removeItem("isGuest");
       return true;
     }
     return false;
@@ -57,17 +67,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const loggedUser = { id: newUser.id, name: newUser.name, email: newUser.email };
     setUser(loggedUser);
+    setIsGuest(false);
     localStorage.setItem("user", JSON.stringify(loggedUser));
+    localStorage.removeItem("isGuest");
     return true;
   };
 
   const logout = () => {
     setUser(null);
+    setIsGuest(false);
     localStorage.removeItem("user");
+    localStorage.removeItem("isGuest");
+  };
+
+  const setGuestMode = () => {
+    const guestUser: User = {
+      id: `guest-${Date.now()}`,
+      name: "Invitado",
+      email: "",
+      isGuest: true,
+    };
+    setUser(guestUser);
+    setIsGuest(true);
+    localStorage.setItem("isGuest", "true");
+  };
+
+  const clearGuestMode = () => {
+    setIsGuest(false);
+    localStorage.removeItem("isGuest");
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider value={{ user, isGuest, login, register, logout, setGuestMode, clearGuestMode }}>
       {children}
     </AuthContext.Provider>
   );

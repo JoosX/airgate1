@@ -18,7 +18,7 @@ const Confirmation = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <div className="container mx-auto px-4 pt-24 pb-12">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -114,6 +114,37 @@ const Confirmation = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Payment Information */}
+              {booking.payment && (
+                <div className="space-y-3 border-t border-border pt-4">
+                  <h3 className="font-semibold text-lg">Información de Pago</h3>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">Método de Pago</p>
+                      <p className="font-semibold capitalize">
+                        {booking.payment.method === 'stripe' && 'Tarjeta de Crédito/Débito'}
+                        {booking.payment.method === 'paypal' && 'PayPal'}
+                        {booking.payment.method === 'credit-card' && 'Tarjeta Manual'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">ID de Transacción</p>
+                      <p className="font-semibold">{booking.payment.transactionId}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Estado</p>
+                      <p className="font-semibold text-green-600">Completado</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Fecha de Pago</p>
+                      <p className="font-semibold">
+                        {new Date(booking.payment.timestamp).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Price Summary */}
               <div className="space-y-3 border-t border-border pt-4">

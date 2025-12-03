@@ -17,7 +17,7 @@ import SeatMap from "@/components/SeatMap";
 const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
   const flight = location.state?.flight as Flight;
 
   const [fullName, setFullName] = useState("");
@@ -46,11 +46,6 @@ const Checkout = () => {
     return seats;
   });
 
-  if (!user) {
-    navigate("/login");
-    return null;
-  }
-
   if (!flight) {
     navigate("/");
     return null;
@@ -70,7 +65,7 @@ const Checkout = () => {
 
   const totalPrice = flight.price + luggagePrices[luggageSize] + planPrices[flightPlan];
 
-  const handleConfirm = () => {
+  const handleContinueToPayment = () => {
     if (!fullName || !idNumber || !phone || !email || !emergencyName || !emergencyPhone || !selectedSeat) {
       toast.error("Por favor completa todos los campos");
       return;
@@ -83,15 +78,12 @@ const Checkout = () => {
       emergency: { name: emergencyName, phone: emergencyPhone },
       extras: { luggageSize, flightPlan, selectedSeat },
       totalPrice,
-      date: new Date().toISOString()
+      date: new Date().toISOString(),
+      isGuest
     };
 
-    // Save booking to localStorage
-    const bookings = JSON.parse(localStorage.getItem("bookings") || "[]");
-    bookings.push(bookingData);
-    localStorage.setItem("bookings", JSON.stringify(bookings));
-
-    navigate("/confirmation", { state: { booking: bookingData } });
+    // Navigate to payment page with booking data
+    navigate("/payment", { state: { booking: bookingData } });
   };
 
   const generateSeats = () => {
@@ -159,9 +151,21 @@ const Checkout = () => {
                   <CardTitle className="flex items-center gap-2">
                     <User className="h-5 w-5 text-primary" />
                     Datos Personales
+                    {isGuest && (
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-normal">
+                        Modo Invitado
+                      </span>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {isGuest && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                      <p className="text-sm text-blue-800">
+                        Estás reservando como invitado. Podrás crear una cuenta después de completar tu compra.
+                      </p>
+                    </div>
+                  )}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="fullName">Nombre Completo</Label>
@@ -337,8 +341,8 @@ const Checkout = () => {
                     </div>
                   </div>
 
-                  <Button onClick={handleConfirm} className="w-full bg-accent hover:bg-accent/90" size="lg">
-                    Confirmar Compra
+                  <Button onClick={handleContinueToPayment} className="w-full bg-accent hover:bg-accent/90" size="lg">
+                    Continuar al Pago
                   </Button>
 
                   <p className="text-xs text-muted-foreground text-center">

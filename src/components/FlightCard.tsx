@@ -12,13 +12,12 @@ interface FlightCardProps {
 
 const FlightCard = ({ flight }: FlightCardProps) => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, setGuestMode } = useAuth();
 
   const handleSelect = () => {
     if (!user) {
-      toast.error("Debes iniciar sesión para reservar un vuelo");
-      navigate("/login");
-      return;
+      // Set guest mode to allow checkout without login
+      setGuestMode();
     }
     navigate("/checkout", { state: { flight } });
   };

@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Checkout from "./pages/Checkout";
+import Payment from "./pages/Payment";
 import Confirmation from "./pages/Confirmation";
 import Help from "./pages/Help";
 import MyAccount from "./pages/MyAccount";
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/payment" element={<Payment />} />
             <Route path="/confirmation" element={<Confirmation />} />
             <Route path="/help" element={<Help />} />
             <Route path="/my-account" element={<MyAccount />} />
