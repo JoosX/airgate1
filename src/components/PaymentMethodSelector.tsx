@@ -1,10 +1,11 @@
+import { ReactNode } from "react";
 import { CreditCard, Check } from "lucide-react";
 import { Card, CardContent } from "./ui/card";
 
 interface PaymentMethod {
     id: string;
     name: string;
-    icon: React.ReactNode;
+    icon: ReactNode;
     description: string;
 }
 
@@ -46,8 +47,8 @@ const PaymentMethodSelector = ({ selectedMethod, onSelectMethod }: PaymentMethod
                 <Card
                     key={method.id}
                     className={`cursor-pointer transition-all hover:shadow-md ${selectedMethod === method.id
-                            ? "border-primary border-2 bg-primary/5"
-                            : "border-border hover:border-primary/50"
+                        ? "border-primary border-2 bg-primary/5"
+                        : "border-border hover:border-primary/50"
                         }`}
                     onClick={() => onSelectMethod(method.id)}
                 >
